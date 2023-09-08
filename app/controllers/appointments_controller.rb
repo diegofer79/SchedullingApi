@@ -16,6 +16,14 @@ class AppointmentsController < ApplicationController
       Rails.logger.error "#{e.message} - #{e.backtrace}"
       return render json: 'Doctor not found', status: :unprocessable_entity
     end
+ 
+    if doctor.appointments
+             .where('start_date >= ?', appointment_params[:start_date])
+             .where('end_date <= ?', appointment_params[:end_date])
+             .count > 0
+      
+      return render json: {error: "An appointment for that date and hour already exists"}, status: :unprocessable_entity
+    end
 
     @model = Appointment.new({
                     doctor: doctor, 
@@ -44,6 +52,14 @@ class AppointmentsController < ApplicationController
     rescue  ActiveRecord::RecordNotFound => e
       Rails.logger.error "#{e.message} - #{e.backtrace}"
       return render json: 'Doctor not found', status: :unprocessable_entity
+    end
+
+    if doctor.appointments
+      .where('start_date >= ?', appointment_params[:start_date])
+      .where('end_date <= ?', appointment_params[:end_date])
+      .count > 0
+
+      return render json: {error: "An appointment for that date and hour already exists"}, status: :unprocessable_entity
     end
 
     if @model.update(appointment_params)
