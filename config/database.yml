@@ -1,0 +1,24 @@
+development_default: &development_default
+  adapter: postgresql
+  encoding: unicode
+  username: postgres
+  password: postgres
+  pool: 5
+
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *development_default
+  database: scheduling_development
+
+test:
+  <<: *development_default
+  database: scheduling_test
+
+production:
+  <<: *default
+  database: scheduling_production
+
