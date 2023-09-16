@@ -1,7 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe WorkingDaysController, type: :controller do
-  
+  let!(:session) do
+    { validation_key: Rails.configuration.api_key }
+  end
+
   context 'Show WorkingDay' do
 
     describe '#create' do
@@ -17,7 +20,7 @@ RSpec.describe WorkingDaysController, type: :controller do
                     } 
 
       context 'Succesfully create model' do
-        before { post :create, params: params }
+        before { post :create, params: params, session: session }
 
         it do
           result = JSON.parse(response.body)
@@ -48,7 +51,7 @@ RSpec.describe WorkingDaysController, type: :controller do
 
       context 'Succesfully update model' do
 
-        before { patch :update, params: params }
+        before { patch :update, params: params, session: session }
 
         it do
           result = JSON.parse(response.body)
@@ -65,7 +68,7 @@ RSpec.describe WorkingDaysController, type: :controller do
     describe '#delete' do
       let!(:doctor) { create(:doctor) }
       let!(:working_day) { create(:working_day, doctor: doctor, weekday: 0) }
-      before { delete :destroy, params: { id: working_day.id } }
+      before { delete :destroy, params: { id: working_day.id }, session: session }
 
       it 'Success delete' do
         expect(WorkingDay.with_deleted.where(id: working_day.id).first.deleted_at).not_to eq(nil)

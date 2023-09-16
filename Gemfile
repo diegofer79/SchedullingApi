@@ -38,6 +38,9 @@ gem "bootsnap", require: false
 # For soft_delete models
 gem 'acts_as_paranoid'
 
+# For Api Quota
+gem 'rack-attack'
+
 group :development, :test do
   gem 'byebug', '~> 11.1.3'
 end

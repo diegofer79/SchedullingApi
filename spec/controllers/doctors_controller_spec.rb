@@ -1,12 +1,15 @@
 require 'rails_helper'
 
 RSpec.describe DoctorsController, type: :controller do
-  
+  let!(:session) do
+    { validation_key: Rails.configuration.api_key }
+  end
+
   context 'Show Doctor' do
 
     describe '#index' do
       let!(:doctor) { create(:doctor) }
-      before { get :index }
+      before { get :index, session: session }
 
       it 'Show expected info for array' do
         expect(JSON.parse(response.body).first.keys).to include(*%w[id full_name])
@@ -18,7 +21,7 @@ RSpec.describe DoctorsController, type: :controller do
       let!(:working_day_1) { create(:working_day, doctor: doctor) }
       let!(:working_day_2) { create(:working_day, doctor: doctor, weekday: 1) }
 
-      before { get :working_days, params: { id: doctor.id } }
+      before { get :working_days, params: { id: doctor.id }, session: session }
 
       context 'Show expected keys for models' do
         it do
@@ -33,7 +36,7 @@ RSpec.describe DoctorsController, type: :controller do
       let!(:working_day) { create(:working_day, doctor: doctor, weekday: 0) }
       let!(:appointment) { create(:appointment, doctor: doctor) }
 
-      before { get :open_slots, params: { id: doctor.id, date: '2023-01-01' } }
+      before { get :open_slots, params: { id: doctor.id, date: '2023-01-01' }, session: session }
 
       context 'Show expected keys for models' do
         it do
@@ -45,7 +48,7 @@ RSpec.describe DoctorsController, type: :controller do
 
     describe '#create' do
       context 'Succesfully create model' do
-        before { post :create, params: {full_name: 'Dr. Full Name'} }
+        before { post :create, params: {full_name: 'Dr. Full Name'}, session: session }
 
         it do
           result = JSON.parse(response.body)
@@ -58,7 +61,8 @@ RSpec.describe DoctorsController, type: :controller do
 
     describe '#delete' do
       let!(:doctor) { create(:doctor) }
-      before { delete :destroy, params: { id: doctor.id } }
+      
+      before { delete :destroy, params: { id: doctor.id }, session: session }
 
       it 'Success delete' do
         expect(Doctor.with_deleted.where(id: doctor.id).first.deleted_at).not_to eq(nil)
