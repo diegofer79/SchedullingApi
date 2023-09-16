@@ -122,6 +122,8 @@ GEM
       nio4r (~> 2.0)
     racc (1.7.1)
     rack (2.2.8)
+    rack-attack (6.7.0)
+      rack (>= 1.0, < 4)
     rack-contrib (2.3.0)
       rack (~> 2.0)
     rack-test (2.1.0)
@@ -192,6 +194,7 @@ DEPENDENCIES
   meta_request (~> 0.7.4)
   pg (~> 1.5.4)
   puma (~> 5.0)
+  rack-attack
   rails (~> 7.0.6)
   rspec-rails (~> 6.0.3)
   tzinfo-data

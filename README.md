@@ -13,7 +13,7 @@
 	- RAILS_ENV=test rails db:migrate
 
 * Run server:
-	- bundle exec rails s
+	- SCHEDULING_API=LOCAL_TOKEN bundle exec rails s
 
 
  * Run test
@@ -122,4 +122,13 @@ Delete Doctor appointment
 ```
 DELETE http://127.0.0.1:3000/appointments/**ID**
 ```
+
+
+
+
+
+# Changes
+
+Added token config as env varable for unauthorize api calls
+Added Rack Attack Gem to throttling repited calls by ip
 
