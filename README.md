@@ -48,18 +48,18 @@
 
 Create Doctor
 ```
-POST http://127.0.0.1:3000/doctors/
+POST http://127.0.0.1:3000/doctors/?validation_key=LOCAL_TOKEN
 {"full_name": "DR Full Name"}
 ```
 
 Lists of Doctors
 ```
-GET http://127.0.0.1:3000/doctors/
+GET http://127.0.0.1:3000/doctors/?validation_key=LOCAL_TOKEN
 ```
 
 Update Doctor
 ```
-POST http://127.0.0.1:3000/doctors/
+POST http://127.0.0.1:3000/doctors/?validation_key=LOCAL_TOKEN
 {"full_name": "Dr. Full Name"}
 ```
 
@@ -67,7 +67,7 @@ POST http://127.0.0.1:3000/doctors/
 
 Create Doctor Working Days and Hours 
 ```
-POST http://127.0.0.1:3000/working_days
+POST http://127.0.0.1:3000/working_days/?validation_key=LOCAL_TOKEN
 { "doctor_id": **ID**, "working_days": [
 	{ "weekday": 0, "start_working_hour": "09:00", "end_working_hour": "18:00" },
 	{ "weekday": 1, "start_working_hour": "09:00", "end_working_hour": "18:00" }
@@ -77,13 +77,13 @@ POST http://127.0.0.1:3000/working_days
 
 Doctor Working Days and Hours
 ```
-GET http://127.0.0.1:3000/doctors/**ID**/working_days
+GET http://127.0.0.1:3000/doctors/**ID**/working_days/?validation_key=LOCAL_TOKEN
 ```
 
 
 Update Doctor Working Days and Hours 
 ```
-PATCH http://127.0.0.1:3000/doctors/**ID**/working_days
+PATCH http://127.0.0.1:3000/doctors/**ID**/working_days/?validation_key=LOCAL_TOKEN
 { "doctor_id": 3, "working_days": [
 	{ "weekday": 0, "start_working_hour": "11:00", "end_working_hour": "19:00" },
 	{ "weekday": 1, "start_working_hour": "11:00", "end_working_hour": "19:00" }
@@ -93,34 +93,34 @@ PATCH http://127.0.0.1:3000/doctors/**ID**/working_days
 
 List of Doctor appointment
 ```
-GET http://127.0.0.1:3000/doctors/**ID**/appointments
+GET http://127.0.0.1:3000/doctors/**ID**/appointments/?validation_key=LOCAL_TOKEN
 ```
 
 List of Doctor open sots
 ```
-GET http://127.0.0.1:3000/doctors/**ID**/open_slots?date=2023-01-09
+GET http://127.0.0.1:3000/doctors/**ID**/open_slots/?date=2023-01-09?validation_key=LOCAL_TOKEN
 ```
 
 Create Doctor appointment
 ```
-POST http://127.0.0.1:3000/appointments/
+POST http://127.0.0.1:3000/appointments/?validation_key=LOCAL_TOKEN
 { "doctor_id": **ID**, "start_date": "2023-01-01T09:00:00.000Z", "end_date": "2023-01-01T09:30:00.000Z"}
 ```
 
 Appointment
 ```
-GET http://127.0.0.1:3000/appointments/**ID**
+GET http://127.0.0.1:3000/appointments/**ID**/?validation_key=LOCAL_TOKEN
 ```
 
 UPDATE Doctor appointment
 ```
-PATCH http://127.0.0.1:3000/appointments/
+PATCH http://127.0.0.1:3000/appointments/?validation_key=LOCAL_TOKEN
 { "id": **ID_APPOINTMENT**, "doctor_id": **ID**, "start_date": "2023-01-01T10:00:00.000Z", "end_date": "2023-01-01T10:30:00.000Z"}
 ```
 
 Delete Doctor appointment
 ```
-DELETE http://127.0.0.1:3000/appointments/**ID**
+DELETE http://127.0.0.1:3000/appointments/**ID**/?validation_key=LOCAL_TOKEN
 ```
 
 
