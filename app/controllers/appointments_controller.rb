@@ -1,7 +1,7 @@
 class AppointmentsController < ApplicationController
 
   before_action :set_appointment, only: %i[ show update destroy ]
-  before_action :parse_date, only: %i[ create update ]
+  # before_action :parse_date, only: %i[ create update ]
 
   # GET /appointments/1
   def show
@@ -10,56 +10,43 @@ class AppointmentsController < ApplicationController
 
   # POST /appointments
   def create
-    begin
-      doctor = Doctor.find(appointment_params[:doctor_id])
-    rescue  ActiveRecord::RecordNotFound => e
-      Rails.logger.error "#{e.message} - #{e.backtrace}"
-      return render json: 'Doctor not found', status: :unprocessable_entity
-    end
+    parse_dates
+    doctor = ::Repositories::DoctorsRepository.find(appointment_params[:doctor_id])
  
-    if doctor.appointments
-             .where('start_date >= ?', appointment_params[:start_date])
-             .where('end_date <= ?', appointment_params[:end_date])
-             .count > 0
-      
-      return render json: {error: "An appointment for that date and hour already exists"}, status: :unprocessable_entity
+    if doctor.has_appointment_on?(appointment_params[:start_date], appointment_params[:end_date])     
+      error = ::Errors::AppointmentDuplicatedError.render_error
+      return render json: error, status: error[:status]
     end
 
-    @model = Appointment.new({
-                    doctor: doctor, 
-                    start_date: appointment_params[:start_date], 
-                    end_date: appointment_params[:end_date], 
-                    patient_info: appointment_params[:patient_info]
-                  })
-
+    @model = ::Repositories::AppointmentsRepository.build(doctor, {
+                                                                  start_date: appointment_params[:start_date], 
+                                                                  end_date: appointment_params[:end_date], 
+                                                                  patient_info: appointment_params[:patient_info]
+                                                                  })
     if @model.save
       render json: @model, status: :created
     else
       render json: @model.errors, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotFound => e
-    Rails.logger.error "#{e.message} - #{e.backtrace}"
-    render json: 'Doctor not found', status: :unprocessable_entity
+    error = ::Errors::DoctorNotFoundError.render_error(e) 
+    return render json: error, status: error[:status]
+  rescue Exception => e
+    error = ::Errors::DateFormatError.render_error(e) 
+    return render json: error, status: error[:status]
   rescue StandardError => e
-    Rails.logger.error "#{e.message} - #{e.backtrace}"
-    render json: e.message, status: :unprocessable_entity
+    error = ::Errors::UnhandledError.render_error(e)
+    return render json: error, status: error[:status]
   end
 
   # PATCH/PUT /appointments/1
   def update
-    begin
-      doctor = Doctor.find(appointment_params[:doctor_id])
-    rescue  ActiveRecord::RecordNotFound => e
-      Rails.logger.error "#{e.message} - #{e.backtrace}"
-      return render json: 'Doctor not found', status: :unprocessable_entity
-    end
+    parse_dates
+    doctor = ::Repositories::DoctorsRepository.find(appointment_params[:doctor_id])
 
-    if doctor.appointments
-      .where('start_date >= ?', appointment_params[:start_date])
-      .where('end_date <= ?', appointment_params[:end_date])
-      .count > 0
-
-      return render json: {error: "An appointment for that date and hour already exists"}, status: :unprocessable_entity
+    if doctor.has_appointment_on?(appointment_params[:start_date], appointment_params[:end_date])     
+      error = ::Errors::AppointmentDuplicatedError.render_error
+      return render json: error, status: error[:status]
     end
 
     if @model.update(appointment_params)
@@ -68,44 +55,45 @@ class AppointmentsController < ApplicationController
       render json: @model.errors, status: :unprocessable_entity
     end
   rescue ActiveRecord::RecordNotFound => e
-    Rails.logger.error "#{e.message} - #{e.backtrace}"
-    render json: 'Doctor not found', status: :unprocessable_entity
+    error = ::Errors::DoctorNotFoundError.render_error(e) 
+    return render json: error, status: error[:status]
+  rescue ::Errors::DateFormatError => e
+    error = ::Errors::DateFormatError.render_error(e) 
+    return render json: error, status: error[:status]
   rescue StandardError => e
-    Rails.logger.error "#{e.message} - #{e.backtrace}"
-    render json: e.message, status: :unprocessable_entity
+    error = ::Errors::UnhandledError.render_error(e)
+    return render json: error, status: error[:status]
   end
 
   # DELETE /appointments/1
   def destroy
     @model.destroy
-    render json: {message: 'Appointment deleted'}
+    render json: { message: 'Appointment deleted' }
   rescue ActiveRecord::RecordNotFound => e
-    Rails.logger.error "#{e.message} - #{e.backtrace}"
-    render json: 'Appointment not found', status: :unprocessable_entity
+    error = ::Errors::DoctorNotFoundError.render_error(e) 
+    return render json: error, status: error[:status]
   rescue StandardError => e
-    Rails.logger.error "#{e.message} - #{e.backtrace}"
-    render json: e.message, status: :unprocessable_entity
+    error = ::Errors::UnhandledError.render_error(e)
+    return render json: error, status: error[:status]
   end
 
 
   private
 
-  # Use callbacks to share common setup or constraints between actions.
   def set_appointment
-    @model = Appointment.find(params[:id])
+    @model = ::Repositories::AppointmentsRepository.find params[:id]
   rescue ActiveRecord::RecordNotFound => e
-    Rails.logger.error "#{e.message} - #{e.backtrace}"
-    render json: 'Appointment not found', status: :unprocessable_entity
+    error = ::Errors::DoctorNotFoundError.render_error(e) 
+    return render json: error, status: error[:status]
   end
 
-  # Only allow a list of trusted parameters through.
   def appointment_params
     params.permit(:id, :start_date, :end_date, :doctor_id, :patient_info)
   end
 
-  def parse_date
-    raise StandardError.new("start_date has a invalid format") unless time_format_valid?(params[:start_date])
-    raise StandardError.new("end_date has a invalid format") unless time_format_valid?(params[:end_date])
+  def parse_dates
+    raise Exception.new("start_date has a invalid format") unless time_format_valid?(params[:start_date])
+    raise Exception.new("end_date has a invalid format") unless time_format_valid?(params[:end_date])
   end
 
   def time_format_valid?(time)

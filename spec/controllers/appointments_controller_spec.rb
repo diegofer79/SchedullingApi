@@ -34,14 +34,25 @@ RSpec.describe AppointmentsController, type: :controller do
       end
 
       context 'Fail to create model' do
+        it 'Invalid doctor' do
+          params = { doctor_id: 100000, start_date: '09:00', end_date: '18:00' }
+          post :create, params: params, session: session
+          result = JSON.parse(response.body)
+          expect(result.dig("message")).to eq('Doctor not found')
+        end
+
         it 'Invalid start_date' do
           params = { doctor_id: doctor.id, start_date: '99:00', end_date: '10:00' }
-          expect { post :create, params: params, session: session }.to raise_error(StandardError, 'start_date has a invalid format')
+          post :create, params: params, session: session
+          result = JSON.parse(response.body)
+          expect(result.dig("message")).to eq('Invalid date format')
         end
 
         it 'Invalid end_date' do
           params = { doctor_id: doctor.id, start_date: '09:00', end_date: '99:00' }
-          expect { post :create, params: params, session: session }.to raise_error(StandardError, 'end_date has a invalid format')
+          post :create, params: params, session: session
+          result = JSON.parse(response.body)
+          expect(result.dig("message")).to eq('Invalid date format')
         end
       end
     end
